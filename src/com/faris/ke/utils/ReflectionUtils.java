@@ -255,6 +255,8 @@ public class ReflectionUtils {
     public static interface ReflectionAccess {
         boolean wasAccessible = false;
 
+        public boolean isAccessible();
+
         public ReflectionAccess setAccessible();
 
         public ReflectionAccess setAccessible(boolean flag);
@@ -286,15 +288,23 @@ public class ReflectionUtils {
             return invoked;
         }
 
+        @Override
+        public boolean isAccessible() {
+            return this.method.isAccessible();
+        }
+
+        @Override
         public MethodInvoker setAccessible() {
             return this.setAccessible(this.wasAccessible);
         }
 
+        @Override
         public MethodInvoker setAccessible(boolean flag) {
             this.method.setAccessible(flag);
             return this;
         }
 
+        @Override
         public boolean wasAccessible() {
             return this.wasAccessible;
         }
@@ -334,6 +344,11 @@ public class ReflectionUtils {
             return this.field;
         }
 
+        @Override
+        public boolean isAccessible() {
+            return this.field.isAccessible();
+        }
+
         public void set(Object value) throws Exception {
             this.set(null, value);
         }
@@ -342,6 +357,17 @@ public class ReflectionUtils {
             this.field.setAccessible(true);
             this.field.set(instance, value);
             this.field.setAccessible(this.wasAccessible());
+        }
+
+        @Override
+        public FieldAccess setAccessible() {
+            return this.setAccessible(this.wasAccessible);
+        }
+
+        @Override
+        public FieldAccess setAccessible(boolean flag) {
+            this.field.setAccessible(flag);
+            return this;
         }
 
         public void setFinal(Object value) throws Exception {
@@ -364,15 +390,7 @@ public class ReflectionUtils {
             modifiersField.setAccessible(modifiersFieldAccess.wasAccessible());
         }
 
-        public FieldAccess setAccessible() {
-            return this.setAccessible(this.wasAccessible);
-        }
-
-        public FieldAccess setAccessible(boolean flag) {
-            this.field.setAccessible(flag);
-            return this;
-        }
-
+        @Override
         public boolean wasAccessible() {
             return this.wasAccessible;
         }
