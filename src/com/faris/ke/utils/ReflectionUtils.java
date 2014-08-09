@@ -349,7 +349,8 @@ public class ReflectionUtils {
         }
 
         public void setFinal(Object instance, Object value) throws Exception {
-            Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers").getField();
+            FieldAccess modifiersFieldAccess = ReflectionUtils.getField(Field.class, "modifiers");
+            Field modifiersField = modifiersFieldAccess.getField();
             modifiersField.setAccessible(true);
 
             int previousModifier = modifiersField.getInt(this.field);
@@ -358,8 +359,9 @@ public class ReflectionUtils {
             this.field.setAccessible(true);
             this.field.set(instance, value);
             this.field.setAccessible(this.wasAccessible());
-            
+
             modifiersField.setInt(this.field, previousModifier);
+            modifiersField.setAccessible(modifiersFieldAccess.wasAccessible());
         }
 
         public FieldAccess setAccessible() {
