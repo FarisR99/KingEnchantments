@@ -1,0 +1,5 @@
+name: KingEnchantments
+version: 0.0.1
+main: com.faris.ke.KingEnchantments
+description: Custom enchantments with an API!
+author: KingFaris10
