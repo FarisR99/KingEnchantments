@@ -1,8 +1,8 @@
 package com.faris.ke;
 
 import com.faris.ke.enchantment.KingEnchantment;
-import com.faris.ke.utils.NbtFactory;
 import com.faris.ke.utils.ReflectionUtils;
+import javafx.scene.effect.Reflection;
 import org.bukkit.command.defaults.EnchantCommand;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,11 +58,9 @@ public class EnchantmentAPI {
             else return itemStack;
 
             if (enchantment.hasNBTTag()) {
-                ItemStack craftItemStack = NbtFactory.getCraftItemStack(itemStack);
-                NbtFactory.NbtCompound nbtCompound = NbtFactory.fromItemTag(craftItemStack);
-                if (nbtCompound == null) nbtCompound = NbtFactory.createCompound();
-                System.out.println(nbtCompound.toString());
-                itemStack = craftItemStack;
+                Class craftItemStackClass = itemStack.getClass();
+                Class nbtTagCompoundClass = ReflectionUtils.getMinecraftClass("NBTTagCompound");
+                // TODO: Continue
             }
             return itemStack;
         }
@@ -191,10 +190,9 @@ public class EnchantmentAPI {
     public static KingEnchantment registerEnchantment(Logger pluginLogger, KingEnchantment enchantment) throws Exception {
         if (enchantment != null && !isCustomEnchantment(enchantment) && enchantment.getName() != null) {
             ReflectionUtils.FieldAccess enchantmentNamesField = ReflectionUtils.getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
-            List<String> enchantmentNames = (List<String>) enchantmentNamesField.getObject(null);
-            if (enchantmentNames == null) enchantmentNames = new ArrayList<String>();
-            if (!enchantmentNames.contains(enchantment.getName())) enchantmentNames.add(enchantment.getName());
-            enchantmentNamesField.setFinal(enchantmentNames);
+            ReflectionUtils.MethodInvoker addListMethod = ReflectionUtils.getMethod(List.class, "add", Object.class);
+            Object enchantmentNames = enchantmentNamesField.getObject(null);
+            addListMethod.invoke(enchantmentNames, enchantment.getName());
 
             ReflectionUtils.FieldAccess acceptingNewField = ReflectionUtils.getField(Enchantment.class, "acceptingNew");
             boolean wasAccepting = acceptingNewField.get(Boolean.class);
@@ -236,10 +234,9 @@ public class EnchantmentAPI {
             unregisterOfficialEnchantment(enchantment);
 
             ReflectionUtils.FieldAccess enchantmentNamesField = ReflectionUtils.getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
-            List<String> enchantmentNames = (List<String>) enchantmentNamesField.get(List.class);
-            if (enchantmentNames == null) enchantmentNames = new ArrayList<String>();
-            enchantmentNames.remove(enchantment.getName());
-            enchantmentNamesField.set(enchantmentNames);
+            ReflectionUtils.MethodInvoker removeListMethod = ReflectionUtils.getMethod(List.class, "remove", Object.class);
+            Object enchantmentNames = enchantmentNamesField.getObject(null);
+            removeListMethod.invoke(enchantmentNames, enchantment.getName());
 
             registeredEnchantments.remove(enchantment.getName());
             return true;
