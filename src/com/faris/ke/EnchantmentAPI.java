@@ -1,8 +1,8 @@
 package com.faris.ke;
 
 import com.faris.ke.enchantment.KingEnchantment;
+import com.faris.ke.utils.ItemUtils;
 import com.faris.ke.utils.ReflectionUtils;
-import javafx.scene.effect.Reflection;
 import org.bukkit.command.defaults.EnchantCommand;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentWrapper;
@@ -12,12 +12,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import static com.faris.ke.utils.ReflectionUtils.*;
 
 /**
  * API for KingEnchantments.
@@ -55,13 +56,7 @@ public class EnchantmentAPI {
             if (itemStack.containsEnchantment(enchantment)) itemStack.removeEnchantment(enchantment);
             if (enchantment.onEnchant(player, itemStack, enchantmentLevel))
                 itemStack.addUnsafeEnchantment(enchantment, enchantmentLevel);
-            else return itemStack;
-
-            if (enchantment.hasNBTTag()) {
-                Class craftItemStackClass = itemStack.getClass();
-                Class nbtTagCompoundClass = ReflectionUtils.getMinecraftClass("NBTTagCompound");
-                // TODO: Continue
-            }
+            itemStack = ItemUtils.addLore(itemStack, 0, "&r&7" + enchantment.getName() + (enchantmentLevel > enchantment.getMaxLevel() ? "." + enchantmentLevel : ItemUtils.getEnchantmentName(enchantmentLevel)) + "");
             return itemStack;
         }
         return itemStack;
@@ -189,12 +184,12 @@ public class EnchantmentAPI {
      */
     public static KingEnchantment registerEnchantment(Logger pluginLogger, KingEnchantment enchantment) throws Exception {
         if (enchantment != null && !isCustomEnchantment(enchantment) && enchantment.getName() != null) {
-            ReflectionUtils.FieldAccess enchantmentNamesField = ReflectionUtils.getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
-            ReflectionUtils.MethodInvoker addListMethod = ReflectionUtils.getMethod(List.class, "add", Object.class);
+            FieldAccess enchantmentNamesField = getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
+            MethodInvoker addListMethod = getMethod(List.class, "add", Object.class);
             Object enchantmentNames = enchantmentNamesField.getObject(null);
             addListMethod.invoke(enchantmentNames, enchantment.getName());
 
-            ReflectionUtils.FieldAccess acceptingNewField = ReflectionUtils.getField(Enchantment.class, "acceptingNew");
+            FieldAccess acceptingNewField = getField(Enchantment.class, "acceptingNew");
             boolean wasAccepting = acceptingNewField.get(Boolean.class);
             acceptingNewField.set(true);
             EnchantmentWrapper.registerEnchantment(enchantment);
@@ -233,8 +228,8 @@ public class EnchantmentAPI {
             enchantment.unregisterListener();
             unregisterOfficialEnchantment(enchantment);
 
-            ReflectionUtils.FieldAccess enchantmentNamesField = ReflectionUtils.getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
-            ReflectionUtils.MethodInvoker removeListMethod = ReflectionUtils.getMethod(List.class, "remove", Object.class);
+            FieldAccess enchantmentNamesField = getField(EnchantCommand.class, "ENCHANTMENT_NAMES");
+            MethodInvoker removeListMethod = getMethod(List.class, "remove", Object.class);
             Object enchantmentNames = enchantmentNamesField.getObject(null);
             removeListMethod.invoke(enchantmentNames, enchantment.getName());
 
@@ -246,11 +241,11 @@ public class EnchantmentAPI {
     }
 
     private static void unregisterOfficialEnchantment(Enchantment enchantment) throws Exception {
-        ReflectionUtils.FieldAccess byIdField = ReflectionUtils.getField(Enchantment.class, "byId");
+        FieldAccess byIdField = getField(Enchantment.class, "byId");
         Map<Integer, Enchantment> byIdMap = byIdField.get(Map.class);
         byIdMap.remove(enchantment.getId());
 
-        ReflectionUtils.FieldAccess byNameField = ReflectionUtils.getField(Enchantment.class, "byName");
+        FieldAccess byNameField = getField(Enchantment.class, "byName");
         Map<String, Enchantment> byNameMap = byNameField.get(Map.class);
         byNameMap.remove(enchantment.getName());
     }
