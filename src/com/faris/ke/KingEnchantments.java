@@ -3,6 +3,7 @@ package com.faris.ke;
 import com.faris.ke.enchantment.KingEnchantment;
 import com.faris.ke.enchantment.enchantments.EnchantmentGlow;
 import com.faris.ke.enchantment.enchantments.EnchantmentPotion;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -51,6 +52,10 @@ public class KingEnchantments extends JavaPlugin {
             EnchantmentAPI.clearEnchantments();
             return false;
         }
+    }
+
+    public static String replaceChatColours(String string) {
+        return string != null ? ChatColor.translateAlternateColorCodes('&', string) : null;
     }
 
     public static KingEnchantments getInstance() {

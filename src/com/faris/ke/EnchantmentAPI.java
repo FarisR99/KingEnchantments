@@ -241,11 +241,11 @@ public class EnchantmentAPI {
     }
 
     private static void unregisterOfficialEnchantment(Enchantment enchantment) throws Exception {
-        FieldAccess byIdField = getField(Enchantment.class, "byId");
+        ReflectionUtils.FieldAccess byIdField = ReflectionUtils.getField(Enchantment.class, "byId");
         Map<Integer, Enchantment> byIdMap = byIdField.get(Map.class);
         byIdMap.remove(enchantment.getId());
 
-        FieldAccess byNameField = getField(Enchantment.class, "byName");
+        ReflectionUtils.FieldAccess byNameField = ReflectionUtils.getField(Enchantment.class, "byName");
         Map<String, Enchantment> byNameMap = byNameField.get(Map.class);
         byNameMap.remove(enchantment.getName());
     }
